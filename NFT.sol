@@ -54,9 +54,22 @@ contract NodeShares is ERC721URIStorage, Pausable, Ownable {
         uint256 tokenId,
         string memory nodeName
     ) public onlyOwner {
-        _safeMint(to, tokenId);
         require(isValidNodeType(nodeName), "Not a valid node type!");
+        _safeMint(to, tokenId);
         _setTokenURI(tokenId, _nodeTypes[nodeName]);
+    }
+
+    function safeMintMultiple(
+        address to,
+        string memory nodeName,
+        uint256 numberOfMints,
+        uint256 startingTokenID
+    ) public onlyOwner {
+        require(isValidNodeType(nodeName), "Not a valid node type!");
+        for (uint256 index = 0; index < numberOfMints; index++) {
+            _safeMint(to, startingTokenID + index);
+            _setTokenURI(startingTokenID + index, _nodeTypes[nodeName]);
+        }
     }
 
     function setTokenURI(uint256 tokenId, string memory tokenURI)
