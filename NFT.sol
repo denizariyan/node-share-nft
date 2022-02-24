@@ -8,12 +8,11 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
 contract NodeShares is ERC721URIStorage, Pausable, Ownable {
-    uint256 _nodeTypesSize;
-    string[] _nodeTypes;
+    mapping(string => string) private _nodeTypes;
+    string[] private _nodeTypeNames;
 
     constructor() ERC721("NodeShares", "NODES") {
-        _nodeTypesSize = 0;
-        _nodeTypes = new string[](_nodeTypesSize);
+        _nodeTypeNames = new string[](0);
     }
 
     function pause() public onlyOwner {
@@ -24,25 +23,43 @@ contract NodeShares is ERC721URIStorage, Pausable, Ownable {
         _unpause();
     }
 
-    function addNodeType(string memory nodeName) public onlyOwner {
-        _nodeTypesSize++;
-        _nodeTypes.push(nodeName);
+    function addNodeType(string memory nodeName, string memory nodeURI)
+        public
+        onlyOwner
+    {
+        _nodeTypeNames.push(nodeName);
+        _nodeTypes[nodeName] = nodeURI;
     }
 
-    function getNodeTypes() public view returns (string[] memory) {
-        return _nodeTypes;
+    function getNodeNames() public view returns (string[] memory) {
+        return _nodeTypeNames;
+    }
+
+    function isValidNodeType(string memory nodeName)
+        private
+        view
+        returns (bool)
+    {
+        for (uint256 i = 0; i < _nodeTypeNames.length; i++) {
+            if (
+                keccak256(abi.encodePacked((_nodeTypeNames[i]))) ==
+                keccak256(abi.encodePacked((nodeName)))
+            ) return true;
+        }
+        return false;
     }
 
     function safeMint(
         address to,
         uint256 tokenId,
-        string memory tokenURI
+        string memory nodeName
     ) public onlyOwner {
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, tokenURI);
+        require(isValidNodeType(nodeName), "Not a valid node type!");
+        _setTokenURI(tokenId, _nodeTypes[nodeName]);
     }
 
-    function settokenURI(uint256 tokenId, string memory tokenURI)
+    function setTokenURI(uint256 tokenId, string memory tokenURI)
         public
         onlyOwner
     {
