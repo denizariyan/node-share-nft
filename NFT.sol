@@ -8,7 +8,13 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
 contract NodeShares is ERC721URIStorage, Pausable, Ownable {
-    constructor() ERC721("NodeShares", "NODES") {}
+    uint256 _nodeTypesSize;
+    string[] _nodeTypes;
+
+    constructor() ERC721("NodeShares", "NODES") {
+        _nodeTypesSize = 0;
+        _nodeTypes = new string[](_nodeTypesSize);
+    }
 
     function pause() public onlyOwner {
         _pause();
@@ -16,6 +22,15 @@ contract NodeShares is ERC721URIStorage, Pausable, Ownable {
 
     function unpause() public onlyOwner {
         _unpause();
+    }
+
+    function addNodeType(string memory nodeName) public onlyOwner {
+        _nodeTypesSize++;
+        _nodeTypes.push(nodeName);
+    }
+
+    function getNodeTypes() public view returns (string[] memory) {
+        return _nodeTypes;
     }
 
     function safeMint(
