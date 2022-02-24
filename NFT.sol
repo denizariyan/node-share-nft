@@ -7,12 +7,17 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
-contract NodeShares is ERC721URIStorage, Pausable, Ownable {
+contract TestShares is ERC721URIStorage, Pausable, Ownable {
     mapping(string => string) private _nodeTypes;
+    mapping(uint256 => string) private _typeOfNode;
+    mapping(address => uint256) private _escrow;
+
+    uint256 private _numOfMints;
     string[] private _nodeTypeNames;
 
-    constructor() ERC721("NodeShares", "NODES") {
+    constructor() ERC721("TESTSHARES", "TESTS") {
         _nodeTypeNames = new string[](0);
+        _numOfMints = 0;
     }
 
     function pause() public onlyOwner {
@@ -33,6 +38,22 @@ contract NodeShares is ERC721URIStorage, Pausable, Ownable {
 
     function getNodeNames() public view returns (string[] memory) {
         return _nodeTypeNames;
+    }
+
+    function getEscrowAmountOf(address addr) public view returns (uint256) {
+        return _escrow[addr];
+    }
+
+    function addToEscrow(string memory nodeTypeToPay, uint256 amountToAdd)
+        public
+        onlyOwner
+    {
+        for (uint256 i = 0; i < _numOfMints; i++) {
+            if (
+                keccak256(abi.encodePacked((_typeOfNode[i]))) ==
+                keccak256(abi.encodePacked((nodeTypeToPay)))
+            ) _escrow[ownerOf(i)] += amountToAdd;
+        }
     }
 
     function isValidNodeType(string memory nodeName)
@@ -56,7 +77,9 @@ contract NodeShares is ERC721URIStorage, Pausable, Ownable {
     ) public onlyOwner {
         require(isValidNodeType(nodeName), "Not a valid node type!");
         _safeMint(to, tokenId);
+        _numOfMints++;
         _setTokenURI(tokenId, _nodeTypes[nodeName]);
+        _typeOfNode[tokenId] = nodeName;
     }
 
     function safeMintMultiple(
@@ -68,7 +91,9 @@ contract NodeShares is ERC721URIStorage, Pausable, Ownable {
         require(isValidNodeType(nodeName), "Not a valid node type!");
         for (uint256 index = 0; index < numberOfMints; index++) {
             _safeMint(to, startingTokenID + index);
+            _numOfMints++;
             _setTokenURI(startingTokenID + index, _nodeTypes[nodeName]);
+            _typeOfNode[startingTokenID + index] = nodeName;
         }
     }
 
