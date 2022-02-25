@@ -44,6 +44,10 @@ contract TestShares is ERC721URIStorage, Pausable, Ownable {
         return _escrow[addr];
     }
 
+    function getNumberOfMints() public view returns (uint256) {
+        return _numOfMints;
+    }
+
     function addToEscrow(string memory nodeTypeToPay, uint256 amountToAdd)
         public
         onlyOwner
@@ -70,30 +74,25 @@ contract TestShares is ERC721URIStorage, Pausable, Ownable {
         return false;
     }
 
-    function safeMint(
-        address to,
-        uint256 tokenId,
-        string memory nodeName
-    ) public onlyOwner {
+    function safeMint(address to, string memory nodeName) public onlyOwner {
         require(isValidNodeType(nodeName), "Not a valid node type!");
-        _safeMint(to, tokenId);
         _numOfMints++;
-        _setTokenURI(tokenId, _nodeTypes[nodeName]);
-        _typeOfNode[tokenId] = nodeName;
+        _safeMint(to, _numOfMints);
+        _setTokenURI(_numOfMints, _nodeTypes[nodeName]);
+        _typeOfNode[_numOfMints] = nodeName;
     }
 
     function safeMintMultiple(
         address to,
         string memory nodeName,
-        uint256 numberOfMints,
-        uint256 startingTokenID
+        uint256 numberOfMints
     ) public onlyOwner {
         require(isValidNodeType(nodeName), "Not a valid node type!");
         for (uint256 index = 0; index < numberOfMints; index++) {
-            _safeMint(to, startingTokenID + index);
             _numOfMints++;
-            _setTokenURI(startingTokenID + index, _nodeTypes[nodeName]);
-            _typeOfNode[startingTokenID + index] = nodeName;
+            _safeMint(to, _numOfMints);
+            _setTokenURI(_numOfMints, _nodeTypes[nodeName]);
+            _typeOfNode[_numOfMints] = nodeName;
         }
     }
 
