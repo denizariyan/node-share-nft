@@ -4,6 +4,6 @@ This is a proof of concept project which I have deployed ONLY on test net, this 
 Feel free to open an issue to ask about anything, would be happy to assist where I can.
 
 ## node-share-nft
-WIP. NFT project that supports different types, URIs and multi-minting for a revenue share model NFT project.
+NFT project that supports different types, URIs and multi-minting for a revenue share model NFT project.
 
 
